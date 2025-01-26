@@ -154,4 +154,15 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
 			});
 		}
 	}
+
+	/**
+	 * 查询用户所有专辑列表
+	 *
+	 * @param userId 用户ID
+	 * @return 返回用户最近添加的10个专辑信息列表
+	 */
+	@Override
+	public List<AlbumInfo> findUserAllAlbumList(Long userId) {
+		return albumInfoMapper.selectList(new LambdaQueryWrapper<AlbumInfo>().eq(AlbumInfo::getUserId, userId).orderByDesc(AlbumInfo::getId).last("limit 10"));
+	}
 }

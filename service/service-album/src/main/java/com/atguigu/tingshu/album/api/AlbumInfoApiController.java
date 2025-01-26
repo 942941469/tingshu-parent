@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Tag(name = "专辑管理")
 @RestController
 @RequestMapping("api/album")
@@ -26,8 +28,7 @@ public class AlbumInfoApiController {
 	@PostMapping("/albumInfo/saveAlbumInfo")
 	@Operation(summary = "保存专辑信息")
 	public Result saveAlbumInfo(@RequestBody @Validated AlbumInfoVo albumInfoVo) {
-		Long userId = AuthContextHolder.getUserId();
-		albumInfoService.saveAlbumInfo(userId, albumInfoVo);
+		albumInfoService.saveAlbumInfo(AuthContextHolder.getUserId(), albumInfoVo);
 		return Result.ok();
 	}
 
@@ -56,6 +57,12 @@ public class AlbumInfoApiController {
 	public Result updateAlbumInfo(@PathVariable Long id, @RequestBody @Validated AlbumInfoVo albumInfoVo) {
 		albumInfoService.updateAlbumInfo(id, albumInfoVo);
 		return Result.ok();
+	}
+
+	@GetMapping("/albumInfo/findUserAllAlbumList")
+	@Operation(summary = "查询用户所有专辑列表")
+	public Result<List<AlbumInfo>> findUserAllAlbumList() {
+		return Result.ok(albumInfoService.findUserAllAlbumList(AuthContextHolder.getUserId()));
 	}
 }
 
