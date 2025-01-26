@@ -3,7 +3,27 @@
 
 
 <mapper namespace="com.atguigu.tingshu.album.mapper.BaseAttributeMapper">
+    <resultMap id="BaseAttributeMap" type="com.atguigu.tingshu.model.album.BaseAttribute" autoMapping="true">
+        <id column="id" property="id"/>
+        <collection property="attributeValueList" ofType="com.atguigu.tingshu.model.album.BaseAttributeValue" autoMapping="true">
+                <id column="bavId" property="id"/>
+        </collection>
+    </resultMap>
 
-
+    <select id="findAttribute" resultMap="BaseAttributeMap">
+        SELECT ba.id,
+               ba.category1_id,
+               ba.attribute_name,
+               ba.create_time,
+               bav.id bavId,
+               bav.create_time,
+               bav.attribute_id,
+               bav.value_name
+        FROM base_attribute ba,
+             base_attribute_value bav
+        WHERE ba.category1_id = #{categoryId}
+          AND ba.is_deleted = 0
+          AND ba.id = bav.attribute_id
+    </select>
 </mapper>
 

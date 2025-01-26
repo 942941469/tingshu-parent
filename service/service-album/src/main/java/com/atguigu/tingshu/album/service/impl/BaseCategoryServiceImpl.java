@@ -2,11 +2,9 @@ package com.atguigu.tingshu.album.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSONObject;
-import com.atguigu.tingshu.album.mapper.BaseCategory1Mapper;
-import com.atguigu.tingshu.album.mapper.BaseCategory2Mapper;
-import com.atguigu.tingshu.album.mapper.BaseCategory3Mapper;
-import com.atguigu.tingshu.album.mapper.BaseCategoryViewMapper;
+import com.atguigu.tingshu.album.mapper.*;
 import com.atguigu.tingshu.album.service.BaseCategoryService;
+import com.atguigu.tingshu.model.album.BaseAttribute;
 import com.atguigu.tingshu.model.album.BaseCategory1;
 import com.atguigu.tingshu.model.album.BaseCategoryView;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -38,7 +36,17 @@ public class BaseCategoryServiceImpl extends ServiceImpl<BaseCategory1Mapper, Ba
 	@Autowired
 	private BaseCategoryViewMapper baseCategoryViewMapper;
 
+	@Autowired
+	private BaseAttributeMapper baseAttributeMapper;
 
+
+	/**
+	 * 获取基础分类列表
+	 *
+	 * 从数据库中获取基础分类信息，并按照一级分类、二级分类、三级分类的层级结构进行封装，最终返回一个包含所有分类信息的列表。
+	 *
+	 * @return 包含所有分类信息的列表
+	 */
 	@Override
 	public List<JSONObject> getBaseCategoryList() {
 		List<JSONObject> result = new ArrayList<>();
@@ -78,5 +86,10 @@ public class BaseCategoryServiceImpl extends ServiceImpl<BaseCategory1Mapper, Ba
 			}
 		}
 		return result;
+	}
+
+	@Override
+	public List<BaseAttribute> findAttribute(Long category1Id) {
+		return baseAttributeMapper.findAttribute(category1Id);
 	}
 }
