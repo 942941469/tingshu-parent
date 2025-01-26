@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
 
 import static com.atguigu.tingshu.common.result.ResultCodeEnum.NOT_DELETE;
@@ -128,5 +129,29 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
 		List<AlbumAttributeValue> albumAttributeValues = albumAttributeValueMapper.selectList(new LambdaQueryWrapper<AlbumAttributeValue>().eq(AlbumAttributeValue::getAlbumId, id));
 		albumInfo.setAlbumAttributeValueVoList(albumAttributeValues);
 		return albumInfo;
+	}
+
+	/**
+	 * 更新专辑信息
+	 *
+	 * @param id 专辑ID
+	 * @param albumInfoVo 包含要更新的专辑信息的VO对象
+	 * @throws Exception 如果在事务执行过程中发生任何异常，则事务将回滚
+	 */
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void updateAlbumInfo(Long id, AlbumInfoVo albumInfoVo) {
+		AlbumInfo albumInfo = BeanUtil.copyProperties(albumInfoVo, AlbumInfo.class);
+		albumInfo.setId(id);
+		albumInfoMapper.updateById(albumInfo);
+		albumAttributeValueMapper.delete(new LambdaQueryWrapper<AlbumAttributeValue>().eq(AlbumAttributeValue::getAlbumId, id));
+		List<AlbumAttributeValue> albumAttributeValueVoList = albumInfo.getAlbumAttributeValueVoList();
+		if (CollectionUtil.isNotEmpty(albumAttributeValueVoList)) {
+			albumAttributeValueVoList.forEach(albumAttributeValueVo -> {
+				AlbumAttributeValue albumAttributeValue = BeanUtil.copyProperties(albumAttributeValueVo, AlbumAttributeValue.class);
+				albumAttributeValue.setAlbumId(id);
+				albumAttributeValueMapper.insert(albumAttributeValue);
+			});
+		}
 	}
 }

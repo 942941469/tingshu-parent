@@ -19,4 +19,6 @@ public interface AlbumInfoService extends IService<AlbumInfo> {
     void removeAlbumInfo(Integer id);
 
     AlbumInfo getAlbumInfo(Integer id);
+
+    void updateAlbumInfo(Long id, AlbumInfoVo albumInfoVo);
 }
