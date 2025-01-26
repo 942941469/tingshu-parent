@@ -17,4 +17,6 @@ public interface AlbumInfoService extends IService<AlbumInfo> {
     Page<AlbumListVo> findUserAlbumPage(Page<AlbumListVo> pageInfo, AlbumInfoQuery albumInfoQuery);
 
     void removeAlbumInfo(Integer id);
+
+    AlbumInfo getAlbumInfo(Integer id);
 }

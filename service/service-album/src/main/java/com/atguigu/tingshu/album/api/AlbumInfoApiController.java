@@ -3,6 +3,7 @@ package com.atguigu.tingshu.album.api;
 import com.atguigu.tingshu.album.service.AlbumInfoService;
 import com.atguigu.tingshu.common.result.Result;
 import com.atguigu.tingshu.common.util.AuthContextHolder;
+import com.atguigu.tingshu.model.album.AlbumInfo;
 import com.atguigu.tingshu.query.album.AlbumInfoQuery;
 import com.atguigu.tingshu.vo.album.AlbumInfoVo;
 import com.atguigu.tingshu.vo.album.AlbumListVo;
@@ -10,6 +11,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "专辑管理")
@@ -23,7 +25,7 @@ public class AlbumInfoApiController {
 
 	@PostMapping("/albumInfo/saveAlbumInfo")
 	@Operation(summary = "保存专辑信息")
-	public Result saveAlbumInfo(@RequestBody AlbumInfoVo albumInfoVo) {
+	public Result saveAlbumInfo(@RequestBody @Validated AlbumInfoVo albumInfoVo) {
 		Long userId = AuthContextHolder.getUserId();
 		albumInfoService.saveAlbumInfo(userId, albumInfoVo);
 		return Result.ok();
@@ -41,6 +43,12 @@ public class AlbumInfoApiController {
 	public Result removeAlbumInfo(@PathVariable Integer id) {
 		albumInfoService.removeAlbumInfo(id);
 		return Result.ok();
+	}
+
+	@GetMapping("/albumInfo/getAlbumInfo/{id}")
+	@Operation(summary = "根据ID查询专辑信息")
+	public Result<AlbumInfo> getAlbumInfo(@PathVariable Integer id) {
+		return Result.ok(albumInfoService.getAlbumInfo(id));
 	}
 }
 

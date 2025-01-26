@@ -98,6 +98,12 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
 		return albumInfoMapper.findUserAlbumPage(pageInfo, albumInfoQuery);
 	}
 
+	/**
+	 * 删除专辑信息
+	 *
+	 * @param id 专辑的ID
+	 * @throws GuiguException 如果专辑包含曲目数量大于0，则抛出GuiguException异常，表示不能删除该专辑
+	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void removeAlbumInfo(Integer id) {
@@ -108,5 +114,19 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
 		albumInfoMapper.deleteById(id);
 		albumAttributeValueMapper.delete(new LambdaQueryWrapper<AlbumAttributeValue>().eq(AlbumAttributeValue::getAlbumId, id));
 		albumStatMapper.delete(new LambdaQueryWrapper<AlbumStat>().eq(AlbumStat::getAlbumId, id));
+	}
+
+	/**
+	 * 根据专辑ID获取专辑信息
+	 *
+	 * @param id 专辑的ID
+	 * @return 包含专辑属性值的专辑信息对象
+	 */
+	@Override
+	public AlbumInfo getAlbumInfo(Integer id) {
+		AlbumInfo albumInfo = albumInfoMapper.selectById(id);
+		List<AlbumAttributeValue> albumAttributeValues = albumAttributeValueMapper.selectList(new LambdaQueryWrapper<AlbumAttributeValue>().eq(AlbumAttributeValue::getAlbumId, id));
+		albumInfo.setAlbumAttributeValueVoList(albumAttributeValues);
+		return albumInfo;
 	}
 }
