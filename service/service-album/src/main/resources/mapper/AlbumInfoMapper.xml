@@ -36,6 +36,7 @@
             <if test="albumInfoQuery.albumTitle != null and albumInfoQuery.albumTitle !=''">
                 AND ai.album_title = #{albumInfoQuery.albumTitle}
             </if>
+            AND ai.is_deleted = 0
         </where>
         )info
         GROUP BY info.album_id

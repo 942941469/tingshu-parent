@@ -35,5 +35,12 @@ public class AlbumInfoApiController {
 		Page<AlbumListVo> pageInfo = new Page<>(page, limit);
 		return Result.ok(albumInfoService.findUserAlbumPage(pageInfo, albumInfoQuery));
 	}
+
+	@DeleteMapping("/albumInfo/removeAlbumInfo/{id}")
+	@Operation(summary = "删除专辑信息")
+	public Result removeAlbumInfo(@PathVariable Integer id) {
+		albumInfoService.removeAlbumInfo(id);
+		return Result.ok();
+	}
 }
 

@@ -7,12 +7,14 @@ import com.atguigu.tingshu.album.mapper.AlbumInfoMapper;
 import com.atguigu.tingshu.album.mapper.AlbumStatMapper;
 import com.atguigu.tingshu.album.service.AlbumInfoService;
 import com.atguigu.tingshu.common.constant.SystemConstant;
+import com.atguigu.tingshu.common.execption.GuiguException;
 import com.atguigu.tingshu.model.album.AlbumAttributeValue;
 import com.atguigu.tingshu.model.album.AlbumInfo;
 import com.atguigu.tingshu.model.album.AlbumStat;
 import com.atguigu.tingshu.query.album.AlbumInfoQuery;
 import com.atguigu.tingshu.vo.album.AlbumInfoVo;
 import com.atguigu.tingshu.vo.album.AlbumListVo;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +23,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import static com.atguigu.tingshu.common.result.ResultCodeEnum.NOT_DELETE;
 
 @Slf4j
 @Service
@@ -82,8 +86,27 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
 		albumStatMapper.insert(new AlbumStat(albumId, statType, 0));
 	}
 
+	/**
+	 * 查询用户专辑分页列表
+	 *
+	 * @param pageInfo 分页信息对象，包含页码、每页显示数量等信息
+	 * @param albumInfoQuery 专辑查询条件对象，用于筛选符合条件的专辑
+	 * @return 分页后的专辑列表对象，包含专辑的详细信息和分页信息
+	 */
 	@Override
 	public Page<AlbumListVo> findUserAlbumPage(Page<AlbumListVo> pageInfo, AlbumInfoQuery albumInfoQuery) {
 		return albumInfoMapper.findUserAlbumPage(pageInfo, albumInfoQuery);
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void removeAlbumInfo(Integer id) {
+		AlbumInfo albumInfo = albumInfoMapper.selectById(id);
+		if (albumInfo.getIncludeTrackCount() > 0) {
+			throw new GuiguException(NOT_DELETE);
+		}
+		albumInfoMapper.deleteById(id);
+		albumAttributeValueMapper.delete(new LambdaQueryWrapper<AlbumAttributeValue>().eq(AlbumAttributeValue::getAlbumId, id));
+		albumStatMapper.delete(new LambdaQueryWrapper<AlbumStat>().eq(AlbumStat::getAlbumId, id));
 	}
 }
