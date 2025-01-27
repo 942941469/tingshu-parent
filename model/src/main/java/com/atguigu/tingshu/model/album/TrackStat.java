@@ -4,11 +4,13 @@ import com.atguigu.tingshu.model.base.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
 @Schema(description = "TrackStat")
 @TableName("track_stat")
+@AllArgsConstructor
 public class TrackStat extends BaseEntity {
 
 	private static final long serialVersionUID = 1L;
