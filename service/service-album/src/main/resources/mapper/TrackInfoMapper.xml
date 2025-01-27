@@ -5,5 +5,47 @@
 <mapper namespace="com.atguigu.tingshu.album.mapper.TrackInfoMapper">
 
 
+    <select id="findUserTrackPage" resultType="com.atguigu.tingshu.vo.album.TrackListVo">
+        SELECT
+        info.album_id,
+        info.album_title,
+        info.track_id,
+        info.cover_url,
+        info.track_title,
+        info.media_duration,
+        info.status,
+        max(if(info.stat_type = '0701', info.stat_num, 0)) playStatNum,
+        max(if(info.stat_type = '0702', info.stat_num, 0)) collectStatNum,
+        max(if(info.stat_type = '0703', info.stat_num, 0)) praiseStatNum,
+        max(if(info.stat_type = '0704', info.stat_num, 0)) albumCommentStatNum
+        FROM (
+        SELECT
+        ti.album_id,
+        ai.album_title,
+        ts.track_id,
+        ti.track_title,
+        ti.media_duration,
+        ti.cover_url,
+        ti.status,
+        ts.stat_num,
+        ts.stat_type
+        FROM track_info ti Inner JOIN track_stat ts ON ti.id=ts.track_id INNER JOIN album_info ai ON
+        ti.album_id=ai.id
+        <where>
+            <if test="trackInfoQuery.userId != null">
+                ti.user_id = #{trackInfoQuery.userId}
+            </if>
+            <if test="trackInfoQuery.status != null and trackInfoQuery.status !=''">
+                AND ti.status = #{trackInfoQuery.status}
+            </if>
+            <if test="trackInfoQuery.trackTitle != null and trackInfoQuery.trackTitle !=''">
+                AND ti.track_title LIKE concat('%', #{trackInfoQuery.trackTitle}, '%')
+            </if>
+            AND ti.is_deleted = 0
+        </where>
+        ) info
+        GROUP BY info.track_id
+        ORDER BY info.track_id DESC
+    </select>
 </mapper>
 
