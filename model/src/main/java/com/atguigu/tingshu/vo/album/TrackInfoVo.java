@@ -10,19 +10,19 @@ import lombok.Data;
 public class TrackInfoVo {
 
 	@Positive(message = "专辑Id不能为空")
-	@Schema(description = "专辑id", required = true)
+	@Schema(description = "专辑id")
 	private Long albumId;
 
 	@NotEmpty(message = "媒体文件Id不能为空")
-	@Schema(description = "媒体文件的唯一标识", required = true)
+	@Schema(description = "媒体文件的唯一标识")
 	private String mediaFileId;
 
 	@NotEmpty(message = "媒体文件地址")
-	@Schema(description = "媒体文件地址", required = true)
+	@Schema(description = "媒体文件地址")
 	private String mediaUrl;
 
 	@NotEmpty(message = "声音标题不能为空")
-	@Schema(description = "声音标题", required = true)
+	@Schema(description = "声音标题")
 	private String trackTitle;
 
 	@Schema(description = "声音简介")

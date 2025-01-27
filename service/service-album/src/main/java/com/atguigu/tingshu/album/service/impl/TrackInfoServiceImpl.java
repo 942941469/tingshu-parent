@@ -92,6 +92,49 @@ public class TrackInfoServiceImpl extends ServiceImpl<TrackInfoMapper, TrackInfo
 	public Page<TrackListVo> findUserTrackPage(Page<TrackListVo> trackListVoPage, TrackInfoQuery trackInfoQuery) {
 		return trackInfoMapper.findUserTrackPage(trackListVoPage, trackInfoQuery);
 	}
+
+	/**
+	 * 根据ID更新音轨信息
+	 *
+	 * @param id        音轨的ID
+	 * @param trackInfoVo 包含要更新的音轨信息的对象
+	 *
+	 * 该方法用于根据给定的ID更新音轨信息。它首先将传入的 {@link TrackInfoVo} 对象中的属性复制到 {@link TrackInfo} 实体类中，
+	 * 然后调用 {@link TrackInfoMapper} 的 {@link TrackInfoMapper#updateById(TrackInfo)} 方法来更新数据库中的音轨信息。
+	 */
+	@Override
+	public void updateTrackInfoById(Long id, TrackInfoVo trackInfoVo) {
+		TrackInfo trackInfo = BeanUtil.copyProperties(trackInfoVo, TrackInfo.class);
+		trackInfo.setId(id);
+		trackInfoMapper.updateById(trackInfo);
+	}
+
+	/**
+	 * 根据ID删除音轨信息
+	 *
+	 * @param id 音轨的ID
+	 *
+	 * 该方法用于根据给定的ID删除音轨信息，并同时更新相关的统计数据和专辑信息。
+	 * 具体步骤如下：
+	 * 1. 使用 {@link TrackInfoMapper} 的 {@link TrackInfoMapper#selectById(Integer)} 方法根据ID查询音轨信息。
+	 * 2. 使用 {@link TrackInfoMapper} 的 {@link TrackInfoMapper#deleteById(Integer)} 方法删除该音轨信息。
+	 * 3. 使用 {@link TrackStatMapper} 的 {@link TrackStatMapper#delete(Wrapper<T>)} 方法删除与该音轨ID相关联的所有统计信息。
+	 * 4. 使用 {@link AlbumInfoMapper} 的 {@link AlbumInfoMapper#selectById(Integer)} 方法查询该音轨所属专辑的信息。
+	 * 5. 将专辑的包含音轨数量减1，并使用 {@link AlbumInfoMapper} 的 {@link AlbumInfoMapper#updateById(AlbumInfo)} 方法更新专辑信息。
+	 *
+	 * 注意：该方法被标记为事务性方法（{@link Transactional}），如果在执行过程中发生任何异常，将会回滚事务，以确保数据的一致性。
+	 */
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void removeTrackInfo(Integer id) {
+		TrackInfo trackInfo = trackInfoMapper.selectById(id);
+		trackInfoMapper.deleteById(id);
+		trackStatMapper.delete(new LambdaQueryWrapper<TrackStat>().eq(TrackStat::getTrackId, id));
+		AlbumInfo albumInfo = albumInfoMapper.selectById(trackInfo.getAlbumId());
+		albumInfo.setIncludeTrackCount(albumInfo.getIncludeTrackCount() - 1);
+		albumInfoMapper.updateById(albumInfo);
+	}
+
 	@Override
 	public void saveTrackStat(Long trackId, String statType) {
 		trackStatMapper.insert(new TrackStat(trackId, statType, 0));
