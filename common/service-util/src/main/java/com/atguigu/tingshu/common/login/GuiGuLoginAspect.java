@@ -1,5 +1,6 @@
 package com.atguigu.tingshu.common.login;
 
+import com.atguigu.tingshu.common.constant.RedisConstant;
 import com.atguigu.tingshu.common.execption.GuiguException;
 import com.atguigu.tingshu.common.result.ResultCodeEnum;
 import com.atguigu.tingshu.common.util.AuthContextHolder;
@@ -37,7 +38,7 @@ public class GuiGuLoginAspect {
         }
         // 不需要登录如果有token也获取
         if (StringUtils.isEmpty(token)) {
-            UserInfoVo userInfoVo = (UserInfoVo) redisTemplate.opsForValue().get(token);
+            UserInfoVo userInfoVo = (UserInfoVo) redisTemplate.opsForValue().get(RedisConstant.USER_LOGIN_KEY_PREFIX + token);
             if (userInfoVo != null) {
                 AuthContextHolder.setUserId(userInfoVo.getId());
                 AuthContextHolder.setUsername(userInfoVo.getNickname());
