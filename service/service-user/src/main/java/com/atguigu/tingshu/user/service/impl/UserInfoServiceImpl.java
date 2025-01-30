@@ -40,6 +40,13 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
 	@Autowired
 	private KafkaService kafkaService;
 
+	/**
+	 * 通过微信登录获取用户信息并返回token
+	 *
+	 * @param code 微信登录凭证
+	 * @return 包含token的Map，如果登录失败则返回null
+	 * @throws Exception 可能抛出的异常
+	 */
 	@SneakyThrows
     @Override
 	public Map<String, String> wxLogin(String code) {

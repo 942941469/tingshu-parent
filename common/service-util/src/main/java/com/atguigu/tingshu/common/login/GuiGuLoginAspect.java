@@ -7,6 +7,7 @@ import com.atguigu.tingshu.common.util.AuthContextHolder;
 import com.atguigu.tingshu.vo.user.UserInfoVo;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -21,6 +22,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
  * @version 1.0
  */
 
+@Slf4j
 @Component
 @Aspect
 public class GuiGuLoginAspect {
@@ -29,15 +31,22 @@ public class GuiGuLoginAspect {
     private RedisTemplate redisTemplate;
     @Around("@annotation(guiGuLogin)")
     public Object login(ProceedingJoinPoint joinPoint, GuiGuLogin guiGuLogin) throws Throwable {
+        log.info("执行了登录校验AOP");
         ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = servletRequestAttributes.getRequest();
         String token = request.getHeader("token");
         // 未登录直接抛出异常
-        if (guiGuLogin.required() && StringUtils.isEmpty(token)) {
-            throw new GuiguException(ResultCodeEnum.LOGIN_AUTH);
+        if (guiGuLogin.required()) {
+            if (StringUtils.isEmpty(token)) {
+                throw new GuiguException(ResultCodeEnum.LOGIN_AUTH);
+            }
+            UserInfoVo userInfoVo = (UserInfoVo) this.redisTemplate.opsForValue().get(RedisConstant.USER_LOGIN_KEY_PREFIX + token);
+            if (null == userInfoVo){
+                throw new GuiguException(ResultCodeEnum.LOGIN_AUTH);
+            }
         }
         // 不需要登录如果有token也获取
-        if (StringUtils.isEmpty(token)) {
+        if (StringUtils.isNotEmpty(token)) {
             UserInfoVo userInfoVo = (UserInfoVo) redisTemplate.opsForValue().get(RedisConstant.USER_LOGIN_KEY_PREFIX + token);
             if (userInfoVo != null) {
                 AuthContextHolder.setUserId(userInfoVo.getId());
