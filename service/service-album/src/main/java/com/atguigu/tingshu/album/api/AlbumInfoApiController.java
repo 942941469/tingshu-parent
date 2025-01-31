@@ -50,7 +50,7 @@ public class AlbumInfoApiController {
 
 	@GetMapping("/albumInfo/getAlbumInfo/{id}")
 	@Operation(summary = "根据ID查询专辑信息")
-	public Result<AlbumInfo> getAlbumInfo(@PathVariable Integer id) {
+	public Result<AlbumInfo> getAlbumInfo(@PathVariable Long id) {
 		return Result.ok(albumInfoService.getAlbumInfo(id));
 	}
 
