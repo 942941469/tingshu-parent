@@ -4,9 +4,8 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.atguigu.tingshu.album.mapper.*;
 import com.atguigu.tingshu.album.service.BaseCategoryService;
-import com.atguigu.tingshu.model.album.BaseAttribute;
-import com.atguigu.tingshu.model.album.BaseCategory1;
-import com.atguigu.tingshu.model.album.BaseCategoryView;
+import com.atguigu.tingshu.model.album.*;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 
@@ -102,5 +101,33 @@ public class BaseCategoryServiceImpl extends ServiceImpl<BaseCategory1Mapper, Ba
 	@Override
 	public BaseCategoryView getCategoryView(Long category3Id) {
 		return baseCategoryViewMapper.selectById(category3Id);
+	}
+
+	/**
+	 * 获取一级分类下前7个三级分类
+	 *
+	 * @param category1Id 一级分类ID
+	 * @return 返回前7个三级分类的列表
+	 */
+	@Override
+	public List<BaseCategory3> getTop7BaseCategory3(Long category1Id) {
+		List<BaseCategory2> baseCategory2 = baseCategory2Mapper.selectList(new LambdaQueryWrapper<BaseCategory2>().eq(BaseCategory2::getCategory1Id, category1Id));
+		if (CollectionUtil.isNotEmpty(baseCategory2)) {
+			List<Long> collect = baseCategory2.stream().map(BaseCategory2::getId).collect(Collectors.toList());
+			return baseCategory3Mapper.selectList(new LambdaQueryWrapper<BaseCategory3>().in(BaseCategory3::getCategory2Id, collect).orderByAsc(BaseCategory3::getId).last("limit 7"));
+		}
+		return null;
+	}
+
+	@Override
+	public JSONObject getCategoryListByCategory1Id(Long category1Id) {
+		List<JSONObject> baseCategoryList = getBaseCategoryList();
+		for (JSONObject jsonObject: baseCategoryList) {
+			Long categoryId = jsonObject.getLong("categoryId");
+			if (categoryId.equals(category1Id)) {
+				return jsonObject;
+            }
+		}
+		return null;
 	}
 }
