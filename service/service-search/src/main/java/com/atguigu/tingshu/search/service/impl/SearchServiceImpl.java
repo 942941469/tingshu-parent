@@ -16,13 +16,20 @@ import com.atguigu.tingshu.query.search.AlbumIndexQuery;
 import com.atguigu.tingshu.search.repository.AlbumInfoIndexRepository;
 import com.atguigu.tingshu.search.service.SearchService;
 import com.atguigu.tingshu.user.client.UserFeignClient;
+import com.atguigu.tingshu.vo.search.AlbumInfoIndexVo;
 import com.atguigu.tingshu.vo.search.AlbumSearchResponseVo;
 import com.atguigu.tingshu.vo.user.UserInfoVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+
+import org.springframework.data.elasticsearch.client.elc.QueryBuilders;
+import org.springframework.data.elasticsearch.client.erhlc.NativeSearchQuery;
+import org.springframework.data.elasticsearch.client.erhlc.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
@@ -120,6 +127,17 @@ public class SearchServiceImpl implements SearchService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return null;
+        AlbumSearchResponseVo albumSearchResponseVo = new AlbumSearchResponseVo();
+        albumSearchResponseVo.setTotal(1L);
+        albumSearchResponseVo.setPageNo(1);
+        albumSearchResponseVo.setPageSize(1);
+        albumSearchResponseVo.setTotalPages(1L);
+        List<AlbumInfoIndexVo> albumInfoIndexVos = new ArrayList<>();
+        List<AlbumInfoIndex> albumInfoIndices = albumInfoIndexRepository.searchByCategory3Id(albumIndexQuery.getCategory3Id());
+        for (AlbumInfoIndex albumInfoIndex : albumInfoIndices) {
+            albumInfoIndexVos.add(BeanUtil.copyProperties(albumInfoIndex, AlbumInfoIndexVo.class));
+        }
+        albumSearchResponseVo.setList(albumInfoIndexVos);
+        return albumSearchResponseVo;
     }
 }
