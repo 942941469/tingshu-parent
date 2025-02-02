@@ -3,12 +3,17 @@ package com.atguigu.tingshu.user.service.impl;
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.IdUtil;
 import com.atguigu.tingshu.common.constant.KafkaConstant;
 import com.atguigu.tingshu.common.constant.RedisConstant;
 import com.atguigu.tingshu.common.service.KafkaService;
 import com.atguigu.tingshu.model.user.UserInfo;
+import com.atguigu.tingshu.model.user.UserPaidAlbum;
+import com.atguigu.tingshu.model.user.UserPaidTrack;
 import com.atguigu.tingshu.user.mapper.UserInfoMapper;
+import com.atguigu.tingshu.user.mapper.UserPaidAlbumMapper;
+import com.atguigu.tingshu.user.mapper.UserPaidTrackMapper;
 import com.atguigu.tingshu.user.service.UserInfoService;
 import com.atguigu.tingshu.vo.user.UserInfoVo;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -20,8 +25,10 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -39,6 +46,12 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
 
 	@Autowired
 	private KafkaService kafkaService;
+
+	@Autowired
+	private UserPaidTrackMapper userPaidTrackMapper;
+
+	@Autowired
+	private UserPaidAlbumMapper userPaidAlbumMapper;
 
 	/**
 	 * 通过微信登录获取用户信息并返回token
@@ -72,6 +85,40 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
 			HashMap<String, String> hashMap = new HashMap<>();
 			hashMap.put("token", token);
 			return hashMap;
+		}
+		return null;
+	}
+
+	@Override
+	public Map<Long, Integer> userIsPaidTrackList(Long userId, Long albumId, List<Long> trackIdList) {
+		// 是否买了专辑
+		Long l = userPaidAlbumMapper.selectCount(new LambdaQueryWrapper<UserPaidAlbum>().eq(UserPaidAlbum::getUserId, userId).eq(UserPaidAlbum::getAlbumId, albumId));
+		if (l > 0) {
+			Map<Long, Integer> map = new HashMap<>();
+			for (Long trackId : trackIdList) {
+				map.put(trackId, 1);
+			}
+			return map;
+		}
+		// 是否买了单曲
+		List<UserPaidTrack> userPaidTracks = userPaidTrackMapper.selectList(new LambdaQueryWrapper<UserPaidTrack>().eq(UserPaidTrack::getUserId, userId).eq(UserPaidTrack::getAlbumId, albumId).in(UserPaidTrack::getTrackId, trackIdList));
+		if (CollectionUtil.isEmpty(userPaidTracks)) {
+			Map<Long, Integer> map = new HashMap<>();
+			for (Long trackId : trackIdList) {
+				map.put(trackId, 0);
+			}
+			return map;
+		}
+		// 获取购买单曲
+		List<Long> paidTrackIdList = userPaidTracks.stream().map(UserPaidTrack::getTrackId).collect(Collectors.toList());
+		if (CollectionUtil.isNotEmpty(paidTrackIdList)) {
+			Map<Long, Integer> map = new HashMap<>();
+			for (Long trackId : trackIdList) {
+				if (paidTrackIdList.contains(trackId)) {
+					map.put(trackId, 1);
+				}
+			}
+			return map;
 		}
 		return null;
 	}
