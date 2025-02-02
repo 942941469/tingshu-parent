@@ -10,6 +10,7 @@ import com.atguigu.tingshu.model.album.AlbumInfo;
 import com.atguigu.tingshu.model.album.TrackInfo;
 import com.atguigu.tingshu.model.album.TrackStat;
 import com.atguigu.tingshu.query.album.TrackInfoQuery;
+import com.atguigu.tingshu.vo.album.AlbumTrackListVo;
 import com.atguigu.tingshu.vo.album.TrackInfoVo;
 import com.atguigu.tingshu.vo.album.TrackListVo;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -133,6 +134,12 @@ public class TrackInfoServiceImpl extends ServiceImpl<TrackInfoMapper, TrackInfo
 		AlbumInfo albumInfo = albumInfoMapper.selectById(trackInfo.getAlbumId());
 		albumInfo.setIncludeTrackCount(albumInfo.getIncludeTrackCount() - 1);
 		albumInfoMapper.updateById(albumInfo);
+	}
+
+	@Override
+	public Page<AlbumTrackListVo> findUserTrackPageByAlbumId(Page<AlbumTrackListVo> objectPage, Long albumId, Long userId) {
+		Page<AlbumTrackListVo> albumTrackListVoPage = trackInfoMapper.findAlbumTrackPage(objectPage, albumId);
+		return albumTrackListVoPage;
 	}
 
 	@Override

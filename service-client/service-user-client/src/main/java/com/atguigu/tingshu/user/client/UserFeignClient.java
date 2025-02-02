@@ -26,5 +26,5 @@ public interface UserFeignClient {
     Result<UserInfoVo> getUserInfoVoByUserId(@PathVariable Long userId);
 
     @PostMapping("/userInfo/userIsPaidTrack/{userId}/{albumId}")
-    Result<Map<Long, Integer>> userIsPaidTrackList(@PathVariable Long userId, @PathVariable Long albumId, @RequestBody List<Long> trackIdList)
+    Result<Map<Long, Integer>> userIsPaidTrackList(@PathVariable Long userId, @PathVariable Long albumId, @RequestBody List<Long> trackIdList);
 }

@@ -2,6 +2,7 @@ package com.atguigu.tingshu.album.service;
 
 import com.atguigu.tingshu.model.album.TrackInfo;
 import com.atguigu.tingshu.query.album.TrackInfoQuery;
+import com.atguigu.tingshu.vo.album.AlbumTrackListVo;
 import com.atguigu.tingshu.vo.album.TrackInfoVo;
 import com.atguigu.tingshu.vo.album.TrackListVo;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -18,4 +19,6 @@ public interface TrackInfoService extends IService<TrackInfo> {
     void updateTrackInfoById(Long id, TrackInfoVo trackInfoVo);
 
     void removeTrackInfo(Integer id);
+
+    Page<AlbumTrackListVo> findUserTrackPageByAlbumId(Page<AlbumTrackListVo> objectPage, Long albumId, Long userId);
 }

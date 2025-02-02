@@ -47,5 +47,27 @@
         GROUP BY info.track_id
         ORDER BY info.track_id DESC
     </select>
+    <select id="findAlbumTrackPage" resultType="com.atguigu.tingshu.vo.album.AlbumTrackListVo">
+        SELECT info.track_id,
+               info.track_title,
+               info.media_duration,
+               info.order_num,
+               info.create_time,
+               max(if(info.stat_type = '0701', info.stat_num, 0)) playStatNum,
+               max(if(info.stat_type = '0704', info.stat_num, 0)) albumCommentStatNum
+        FROM (SELECT ti.id track_id,
+                     ti.track_title,
+                     ti.media_duration,
+                     ti.order_num,
+                     ts.stat_type,
+                     ts.stat_num,
+                     ti.create_time
+              FROM track_info ti
+                       JOIN track_stat ts ON ti.id = ts.track_id
+              WHERE ti.album_id = #{albumId}
+                AND ti.is_deleted = 0) info
+        GROUP BY info.track_id
+        ORDER BY info.order_num ASC
+    </select>
 </mapper>
 
